@@ -6,16 +6,6 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// Level represents the log level
-type Level int
-
-const (
-	DebugLevel Level = iota
-	InfoLevel
-	WarnLevel
-	ErrorLevel
-)
-
 type Entry interface {
 	WithFields(fields logrus.Fields) *logrus.Entry
 }
@@ -38,17 +28,20 @@ func New(entry Entry) *Logger {
 	}
 }
 
-func (l *Logger) ChangeLevel(from Level, to logrus.Level) {
-	switch from {
-	case DebugLevel:
-		l.debugLevel = to
-	case InfoLevel:
-		l.infoLevel = to
-	case WarnLevel:
-		l.warnLevel = to
-	case ErrorLevel:
-		l.errorLevel = to
-	}
+func (l *Logger) ChangeDebugLevel(to logrus.Level) {
+	l.debugLevel = to
+}
+
+func (l *Logger) ChangeErrorLevel(to logrus.Level) {
+	l.errorLevel = to
+}
+
+func (l *Logger) ChangeInfoLevel(to logrus.Level) {
+	l.infoLevel = to
+}
+
+func (l *Logger) ChangeWarnLevel(to logrus.Level) {
+	l.warnLevel = to
 }
 
 func (l *Logger) Debug(msg string, keysAndValues ...any) {
