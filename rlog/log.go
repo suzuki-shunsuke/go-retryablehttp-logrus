@@ -41,7 +41,7 @@ func createFields(keysAndValues []any) logrus.Fields {
 	if s%2 != 0 {
 		s--
 	}
-	cnt := s / 2
+	cnt := s / 2 //nolint:mnd
 	fields := make(logrus.Fields, cnt)
 	for i := range cnt {
 		fields[fmt.Sprint(keysAndValues[i*2])] = keysAndValues[i*2+1]
