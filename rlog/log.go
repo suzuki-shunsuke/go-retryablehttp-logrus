@@ -11,29 +11,57 @@ type Entry interface {
 }
 
 type Logger struct {
-	entry Entry
+	entry      Entry
+	debugLevel logrus.Level
+	errorLevel logrus.Level
+	infoLevel  logrus.Level
+	warnLevel  logrus.Level
 }
 
 func New(entry Entry) *Logger {
 	return &Logger{
-		entry: entry,
+		entry:      entry,
+		debugLevel: logrus.DebugLevel,
+		errorLevel: logrus.ErrorLevel,
+		infoLevel:  logrus.InfoLevel,
+		warnLevel:  logrus.WarnLevel,
 	}
 }
 
+func (l *Logger) ChangeDebugLevel(to logrus.Level) {
+	l.debugLevel = to
+}
+
+func (l *Logger) ChangeErrorLevel(to logrus.Level) {
+	l.errorLevel = to
+}
+
+func (l *Logger) ChangeInfoLevel(to logrus.Level) {
+	l.infoLevel = to
+}
+
+func (l *Logger) ChangeWarnLevel(to logrus.Level) {
+	l.warnLevel = to
+}
+
 func (l *Logger) Debug(msg string, keysAndValues ...any) {
-	l.entry.WithFields(createFields(keysAndValues)).Debug(msg)
+	l.log(l.debugLevel, msg, keysAndValues...)
 }
 
 func (l *Logger) Error(msg string, keysAndValues ...any) {
-	l.entry.WithFields(createFields(keysAndValues)).Error(msg)
+	l.log(l.errorLevel, msg, keysAndValues...)
 }
 
 func (l *Logger) Info(msg string, keysAndValues ...any) {
-	l.entry.WithFields(createFields(keysAndValues)).Info(msg)
+	l.log(l.infoLevel, msg, keysAndValues...)
 }
 
 func (l *Logger) Warn(msg string, keysAndValues ...any) {
-	l.entry.WithFields(createFields(keysAndValues)).Warn(msg)
+	l.log(l.warnLevel, msg, keysAndValues...)
+}
+
+func (l *Logger) log(level logrus.Level, msg string, keysAndValues ...any) {
+	l.entry.WithFields(createFields(keysAndValues)).Log(level, msg)
 }
 
 func createFields(keysAndValues []any) logrus.Fields {
