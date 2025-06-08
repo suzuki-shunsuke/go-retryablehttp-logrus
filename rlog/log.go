@@ -1,3 +1,4 @@
+// Package rlog provides a hashicorp/go-retryablehttp's LeveledLogger for sirupsen/logrus.
 package rlog
 
 import (
@@ -6,10 +7,12 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// Entry is an interface to abstract logrus.Entry.
 type Entry interface {
 	WithFields(fields logrus.Fields) *logrus.Entry
 }
 
+// Logger is a logger implementing hashicorp/go-retryablehttp's LeveledLogger interface.
 type Logger struct {
 	entry      Entry
 	debugLevel logrus.Level
@@ -18,6 +21,7 @@ type Logger struct {
 	warnLevel  logrus.Level
 }
 
+// New creates a new Logger.
 func New(entry Entry) *Logger {
 	return &Logger{
 		entry:      entry,
@@ -28,34 +32,42 @@ func New(entry Entry) *Logger {
 	}
 }
 
+// ChangeDebugLevel changes the log level of logger.Debug().
 func (l *Logger) ChangeDebugLevel(to logrus.Level) {
 	l.debugLevel = to
 }
 
+// ChangeErrorLevel changes the log level of logger.Error().
 func (l *Logger) ChangeErrorLevel(to logrus.Level) {
 	l.errorLevel = to
 }
 
+// ChangeInfoLevel changes the log level of logger.Info().
 func (l *Logger) ChangeInfoLevel(to logrus.Level) {
 	l.infoLevel = to
 }
 
+// ChangeWarnLevel changes the log level of logger.Warn().
 func (l *Logger) ChangeWarnLevel(to logrus.Level) {
 	l.warnLevel = to
 }
 
+// Debug outputs a debug log.
 func (l *Logger) Debug(msg string, keysAndValues ...any) {
 	l.log(l.debugLevel, msg, keysAndValues...)
 }
 
+// Error outputs an error log.
 func (l *Logger) Error(msg string, keysAndValues ...any) {
 	l.log(l.errorLevel, msg, keysAndValues...)
 }
 
+// Info outputs an info log.
 func (l *Logger) Info(msg string, keysAndValues ...any) {
 	l.log(l.infoLevel, msg, keysAndValues...)
 }
 
+// Warn outputs a warn log.
 func (l *Logger) Warn(msg string, keysAndValues ...any) {
 	l.log(l.warnLevel, msg, keysAndValues...)
 }
