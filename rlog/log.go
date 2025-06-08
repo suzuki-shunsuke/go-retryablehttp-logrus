@@ -10,95 +10,65 @@ import (
 type Level int
 
 const (
-	// DebugLevel logs debug messages
 	DebugLevel Level = iota
-	// InfoLevel logs informational messages
 	InfoLevel
-	// WarnLevel logs warning messages
 	WarnLevel
-	// ErrorLevel logs error messages
 	ErrorLevel
 )
-
-// String returns the string representation of the log level
-func (l Level) String() string {
-	switch l {
-	case DebugLevel:
-		return "debug"
-	case InfoLevel:
-		return "info"
-	case WarnLevel:
-		return "warn"
-	case ErrorLevel:
-		return "error"
-	default:
-		return "unknown"
-	}
-}
-
-// ToLogrusLevel converts the Level to logrus.Level
-func (l Level) ToLogrusLevel() logrus.Level {
-	switch l {
-	case DebugLevel:
-		return logrus.DebugLevel
-	case InfoLevel:
-		return logrus.InfoLevel
-	case WarnLevel:
-		return logrus.WarnLevel
-	case ErrorLevel:
-		return logrus.ErrorLevel
-	default:
-		return logrus.InfoLevel
-	}
-}
 
 type Entry interface {
 	WithFields(fields logrus.Fields) *logrus.Entry
 }
 
 type Logger struct {
-	entry  Entry
-	levels map[Level]logrus.Level
+	entry      Entry
+	debugLevel logrus.Level
+	errorLevel logrus.Level
+	infoLevel  logrus.Level
+	warnLevel  logrus.Level
 }
 
 func New(entry Entry) *Logger {
 	return &Logger{
-		entry: entry,
-		levels: map[Level]logrus.Level{
-			DebugLevel: logrus.DebugLevel,
-			InfoLevel:  logrus.InfoLevel,
-			WarnLevel:  logrus.WarnLevel,
-			ErrorLevel: logrus.ErrorLevel,
-		},
+		entry:      entry,
+		debugLevel: logrus.DebugLevel,
+		errorLevel: logrus.ErrorLevel,
+		infoLevel:  logrus.InfoLevel,
+		warnLevel:  logrus.WarnLevel,
 	}
 }
 
 func (l *Logger) ChangeLevel(from Level, to logrus.Level) {
-	l.levels[from] = to
+	switch from {
+	case DebugLevel:
+		l.debugLevel = to
+	case InfoLevel:
+		l.infoLevel = to
+	case WarnLevel:
+		l.warnLevel = to
+	case ErrorLevel:
+		l.errorLevel = to
+	}
 }
 
 func (l *Logger) Debug(msg string, keysAndValues ...any) {
-	l.log(DebugLevel, msg, keysAndValues...)
+	l.log(l.debugLevel, msg, keysAndValues...)
 }
 
 func (l *Logger) Error(msg string, keysAndValues ...any) {
-	l.log(ErrorLevel, msg, keysAndValues...)
+	l.log(l.errorLevel, msg, keysAndValues...)
 }
 
 func (l *Logger) Info(msg string, keysAndValues ...any) {
-	l.log(InfoLevel, msg, keysAndValues...)
+	l.log(l.infoLevel, msg, keysAndValues...)
 }
 
 func (l *Logger) Warn(msg string, keysAndValues ...any) {
-	l.log(WarnLevel, msg, keysAndValues...)
+	l.log(l.warnLevel, msg, keysAndValues...)
 }
 
-func (l *Logger) log(level Level, msg string, keysAndValues ...any) {
-	lvl, ok := l.levels[level]
-	if !ok {
-		lvl = level.ToLogrusLevel()
-	}
-	l.entry.WithFields(createFields(keysAndValues)).Log(lvl, msg)
+func (l *Logger) log(level logrus.Level, msg string, keysAndValues ...any) {
+	l.entry.WithFields(createFields(keysAndValues)).Log(level, msg)
 }
 
 func createFields(keysAndValues []any) logrus.Fields {
